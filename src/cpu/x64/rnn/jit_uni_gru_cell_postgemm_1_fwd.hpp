@@ -139,7 +139,6 @@ protected:
             deq_w(src_data_t, G1, tmp1_vmm, tmp2_vmm, 1 * rnn_.dhc, mask, true);
             uni_vaddps(G1, G1, B_addr(1));
             sigmoid_injector_->compute_vector(G1.getIdx());
-            uni_vmovups(sg_addr(1), G1);
             // if training we write back the gates
             if (is_training) to_src<src_data_t>(wg_addr(1), G1, vlen);
 
