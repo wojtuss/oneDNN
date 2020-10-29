@@ -132,8 +132,7 @@ protected:
             uni_vmovups(G2, sg_addr(2));
             // dequantize gate from s32 to f32 if needed
             deq_w(src_data_t, G2, tmp1_vmm, tmp2_vmm, 2 * rnn_.dhc, mask, true);
-            uni_vmovups(tmp1_vmm, B_addr(2));
-            uni_vaddps(G2, G2, tmp1_vmm);
+            uni_vaddps(G2, G2, B_addr(2));
             tanh_injector_->compute_vector(G2.getIdx());
             // if training we write back the gates
             if (is_training) to_src<src_data_t>(wg_addr(2), G2, vlen);
@@ -188,7 +187,7 @@ protected:
             tanh_injector_->compute_vector(G2s.getIdx());
             // if training we write back the gates
             if (is_training)
-                to_src<src_data_t>(wg_addr(2), G2, scratch_dt_size);
+                to_src<src_data_t>(wg_addr(2), G2s, scratch_dt_size);
 
             // states_t_l = states_tm1_l * G0 + (1 - G0) * G2
             uni_vmovss(G0s, sg_addr(0));

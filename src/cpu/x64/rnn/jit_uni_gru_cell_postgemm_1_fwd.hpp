@@ -127,8 +127,7 @@ protected:
             uni_vmovups(G0, sg_addr(0));
             // dequantize gate from s32 to f32 if needed
             deq_w(src_data_t, G0, tmp1_vmm, tmp2_vmm, 0 * rnn_.dhc, mask, true);
-            uni_vmovups(tmp1_vmm, B_addr(0));
-            uni_vaddps(G0, G0, tmp1_vmm);
+            uni_vaddps(G0, G0, B_addr(0));
             sigmoid_injector_->compute_vector(G0.getIdx());
             // we store it for use in postgemm_part2
             uni_vmovups(sg_addr(0), G0);
@@ -138,8 +137,7 @@ protected:
             uni_vmovups(G1, sg_addr(1));
             // dequantize gate from s32 to f32 if needed
             deq_w(src_data_t, G1, tmp1_vmm, tmp2_vmm, 1 * rnn_.dhc, mask, true);
-            uni_vmovups(tmp1_vmm, B_addr(1));
-            uni_vaddps(G1, G1, tmp1_vmm);
+            uni_vaddps(G1, G1, B_addr(1));
             sigmoid_injector_->compute_vector(G1.getIdx());
             uni_vmovups(sg_addr(1), G1);
             // if training we write back the gates
@@ -192,7 +190,7 @@ protected:
             // we store it for use in postgemm_part2
             uni_vmovss(sg_addr(0), G0s);
             if (is_training)
-                to_src<src_data_t>(wg_addr(0), G0, scratch_dt_size);
+                to_src<src_data_t>(wg_addr(0), G0s, scratch_dt_size);
 
             // Compute gate 1: G1 = sigmoid(G1 + b1)
             uni_vmovss(G1s, sg_addr(1));
@@ -201,10 +199,10 @@ protected:
                     false);
             uni_vaddss(G1s, G1s, B_addr(1));
             sigmoid_injector_->compute_vector(G1s.getIdx());
-            uni_vmovss(sg_addr(1), G1);
+            uni_vmovss(sg_addr(1), G1s);
             // if training we write back the gates
             if (is_training)
-                to_src<src_data_t>(wg_addr(1), G1, scratch_dt_size);
+                to_src<src_data_t>(wg_addr(1), G1s, scratch_dt_size);
 
             // states_t_l = states_tm1_l * G1
             to_float<src_data_t>(
